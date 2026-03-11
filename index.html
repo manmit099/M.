@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐍 PyJokes · programming humour</title>
+  <!-- same fonts as flashcard system -->
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ----- exact variables from flashcard ----- */
+    :root {
+      --bg: #000;
+      --surface: #13161e;
+      --front: #161b26;
+      --back: #0f1a2e;
+      --border: #1e2d45;
+      --blue: #3b82f6;
+      --yellow: #f5c842;
+      --red: #f87171;
+      --green: #34d399;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .app {
+      width: min(580px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ----- header styles (identical) ----- */
+    header {
+      text-align: center;
+    }
+
+    .badge {
+      font-family: 'Space Mono', monospace;
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.75rem;
+      border-radius: 2rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin: 0.25rem 0;
+      background: linear-gradient(135deg, var(--blue), var(--yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ----- joke card (single‑sided, same as .card-front) ----- */
+    .flashcard {
+      perspective: none;
+    }
+
+    .card {
+      width: 100%;
+      height: 240px;
+      position: relative;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--front);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 1.3rem;
+      line-height: 1.6;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+      transition: background 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--blue);
+    }
+
+    /* ----- category panel ----- */
+    .category-panel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 0.5rem 0 0.25rem;
+    }
+
+    .cat-btn {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 0.7rem 1.5rem;
+      border-radius: 3rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 0 1 auto;
+      min-width: 110px;
+    }
+
+    .cat-btn[data-cat="neutral"] {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .cat-btn[data-cat="neutral"]:hover,
+    .cat-btn[data-cat="neutral"].active {
+      background: var(--blue);
+      color: black;
+      border-color: var(--blue);
+    }
+
+    .cat-btn[data-cat="twisted"] {
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .cat-btn[data-cat="twisted"]:hover,
+    .cat-btn[data-cat="twisted"].active {
+      background: var(--red);
+      color: black;
+      border-color: var(--red);
+    }
+
+    .cat-btn[data-cat="nerdy"] {
+      border-color: var(--green);
+      color: var(--green);
+    }
+    .cat-btn[data-cat="nerdy"]:hover,
+    .cat-btn[data-cat="nerdy"].active {
+      background: var(--green);
+      color: black;
+      border-color: var(--green);
+    }
+
+    /* ----- main joke button ----- */
+    .get-joke-btn {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-size: 1.5rem;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      border-radius: 4rem;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      font-family: 'Sora', sans-serif;
+      letter-spacing: 1px;
+      margin: 0.5rem 0;
+    }
+
+    .get-joke-btn:hover {
+      background: #1e2a3a;
+      border-color: var(--blue);
+      transform: scale(1.02);
+    }
+
+    .get-joke-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* ----- action buttons container (copy + search) ----- */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .action-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 1rem;
+      padding: 0.5rem 1.4rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .action-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* special styling for search button */
+    #searchBtn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    /* ----- footer (exact same) ----- */
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.2rem;
+    }
+
+    .hint {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: -0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="badge">🐍 PyJokes · 3 flavours</div>
+      <h2>Programming Humour</h2>
+      <div class="subtitle">CODEx099 by MANMIT</div>
+    </header>
+
+    <!-- joke display card -->
+    <div class="flashcard">
+      <div class="card" id="jokeDisplay">
+        Click a category and press the button!
+      </div>
+    </div>
+
+    <!-- action buttons: copy + search side by side -->
+    <div class="action-buttons">
+      <button class="action-btn" id="copyBtn">📋 copy</button>
+      <button class="action-btn" id="searchBtn">🔍 Google this joke</button>
+    </div>
+
+    <!-- category selector -->
+    <div class="category-panel">
+      <button class="cat-btn active" data-cat="neutral" id="catNeutral">neutral</button>
+      <button class="cat-btn" data-cat="twisted" id="catTwisted">twisted</button>
+      <button class="cat-btn" data-cat="nerdy" id="catNerdy">nerdy</button>
+    </div>
+
+    <!-- main joke button -->
+    <button class="get-joke-btn" id="getJokeBtn">
+      <span>🎲</span> Reload joke <span>✨</span>
+    </button>
+
+    <!-- keyboard hint -->
+    <div class="hint">
+      keys: 1 2 3 · space
+    </div>
+
+    <footer>
+      PyJokes · CODEx099 is the platform created by me,MANMIT
+      
+    
+    </footer>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- JOKE COLLECTIONS ----------
+      const jokes = {
+        neutral: [
+          "How many programmers does it take to change a light bulb? None, that's a hardware problem.",
+          "A SQL query walks into a bar, walks up to two tables and asks: 'Can I join you?'",
+          "Why do programmers prefer dark mode? Because light attracts bugs.",
+          "What's a programmer's favourite hangout place? The Foo Bar.",
+          "I've got a really good UDP joke to tell you, but I don't know if you'll get it.",
+          "A programmer puts two glasses on his bedside table: water and wine. He wakes up thirsty, looks at them, and says: 'Water or wine? … I'll decide later.'",
+          "A programmer is someone who solves a problem you didn't know you had in a way you don't understand.",
+          "Real programmers count from 0."
+        ],
+        twisted: [
+          "Why did the programmer quit his job? Because he didn't get arrays (a raise).",
+          "There are only 10 kinds of people in the world: those who understand binary and those who don't.",
+          "A programmer's wife sends him to the store: 'Get a loaf of bread, and if they have eggs, get a dozen.' He comes back with 12 loaves of bread.",
+          "Why do Java developers wear glasses? Because they can't C#.",
+          "What do you call a programmer from Finland? Nerdic.",
+          "A programmer is walking to work when another programmer shouts: 'I'm walking here!' The first replies: 'I thought you were compiling.'",
+          "A programmer's partner says: 'Go to the store and buy a carton of milk. If they have avocados, buy six.' He returns with six cartons of milk and says 'They had avocados.'"
+        ],
+        nerdy: [
+          "Why do programmers always mix up Halloween and Christmas? Because Oct 31 == Dec 25.",
+          "How do you tell HTML5 from HTML? Try it out in Internet Explorer – if it doesn't work, it's HTML5.",
+          "A programmer's favorite candy is skittles: taste the rainbow (testing the rainbow table).",
+          "What's the object-oriented way to become wealthy? Inheritance.",
+          "There are three kinds of lies: lies, damned lies, and benchmarks.",
+          "A programmer's computer beats him at chess. Then it beats him at Go. Then it beats him at tic-tac-toe – removing the board, it says: 'Your move.'",
+          "Programming is 10% writing code and 90% understanding why it's not working.",
+          "The best thing about a boolean is even if you are wrong, you are only off by a bit."
+        ]
+      };
+
+      // current active category
+      let currentCategory = 'neutral';
+
+      // DOM elements
+      const jokeDisplay = document.getElementById('jokeDisplay');
+      const neutralBtn = document.getElementById('catNeutral');
+      const twistedBtn = document.getElementById('catTwisted');
+      const nerdyBtn = document.getElementById('catNerdy');
+      const getJokeBtn = document.getElementById('getJokeBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      const searchBtn = document.getElementById('searchBtn');
+
+      // helper: remove active class from all category buttons
+      function deactivateCategories() {
+        neutralBtn.classList.remove('active');
+        twistedBtn.classList.remove('active');
+        nerdyBtn.classList.remove('active');
+      }
+
+      // set active category and update currentCategory
+      function setActiveCategory(cat) {
+        deactivateCategories();
+        if (cat === 'neutral') neutralBtn.classList.add('active');
+        else if (cat === 'twisted') twistedBtn.classList.add('active');
+        else if (cat === 'nerdy') nerdyBtn.classList.add('active');
+        currentCategory = cat;
+      }
+
+      // return random joke from given category
+      function getRandomJoke(cat) {
+        const catJokes = jokes[cat];
+        if (!catJokes || catJokes.length === 0) return "⚠️ no jokes in this category?";
+        const randomIndex = Math.floor(Math.random() * catJokes.length);
+        return catJokes[randomIndex];
+      }
+
+      // display a new joke based on current category
+      function tellJoke() {
+        const joke = getRandomJoke(currentCategory);
+        jokeDisplay.textContent = joke;
+      }
+
+      // event listeners for category buttons
+      neutralBtn.addEventListener('click', () => setActiveCategory('neutral'));
+      twistedBtn.addEventListener('click', () => setActiveCategory('twisted'));
+      nerdyBtn.addEventListener('click', () => setActiveCategory('nerdy'));
+
+      // main joke button
+      getJokeBtn.addEventListener('click', tellJoke);
+
+      // copy joke to clipboard
+      copyBtn.addEventListener('click', () => {
+        const joke = jokeDisplay.textContent;
+        if (joke && joke !== 'Click a category and press the button!') {
+          navigator.clipboard.writeText(joke).then(() => {
+            copyBtn.textContent = '✓ copied!';
+            setTimeout(() => { copyBtn.textContent = '📋 copy'; }, 1500);
+          }).catch(() => {
+            alert('could not copy');
+          });
+        } else {
+          alert('no joke to copy – get a joke first!');
+        }
+      });
+
+      // 🔍 SEARCH ON GOOGLE BUTTON (with explain this pyjoke)
+      searchBtn.addEventListener('click', () => {
+        const joke = jokeDisplay.textContent;
+        if (joke && joke !== 'Click a category and press the button!') {
+          // Append the explanatory phrase
+          const query = encodeURIComponent(joke + ", explain this pyjoke");
+          window.open(`https://www.google.com/search?q=${query}`, '_blank');
+        } else {
+          alert('get a joke first before searching!');
+        }
+      });
+
+      // keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // 1,2,3 for categories
+        if (e.key === '1') {
+          setActiveCategory('neutral');
+          e.preventDefault();
+        } else if (e.key === '2') {
+          setActiveCategory('twisted');
+          e.preventDefault();
+        } else if (e.key === '3') {
+          setActiveCategory('nerdy');
+          e.preventDefault();
+        } else if (e.code === 'Space') {
+          e.preventDefault();
+          tellJoke();
+        }
+      });
+
+      // load a random joke on page start
+      window.addEventListener('load', () => {
+        setActiveCategory('neutral');
+        tellJoke();
+      });
+    })();
+  </script>
+</body>
+</html>
